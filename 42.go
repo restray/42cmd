@@ -7,6 +7,8 @@ import (
 	"log"
 	"strings"
 	"time"
+
+	"main/ft_auth"
 )
 
 type User42 struct {
@@ -164,7 +166,7 @@ type User42 struct {
 }
 
 func makeReq(req string) []byte {
-	client := getHTTPClient()
+	client := ft_auth.GetHTTPClient()
 
 	response, err := client.Get("https://api.intra.42.fr/v2" + req)
 	if err != nil {
