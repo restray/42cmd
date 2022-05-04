@@ -1,14 +1,37 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
+	"main/commands"
 	"main/ft_auth"
 	"os"
+	"text/tabwriter"
 
 	"github.com/joho/godotenv"
 )
+
+func printHelp(cmds []commands.FtCommand) {
+	w := tabwriter.NewWriter(os.Stdout, 5, 0, 1, ' ', tabwriter.AlignRight)
+
+	for _, cmd := range cmds {
+		w_alias := ""
+		for _, alias := range cmd.GetAlias() {
+			if len(w_alias) > 0 {
+				w_alias += ", "
+			}
+			w_alias += alias
+		}
+		if len(w_alias) > 0 {
+			w_alias = "Alias: " + w_alias
+		}
+
+		fmt.Fprintf(w, "%s\t%s\t%s\t\n", cmd.GetCommand(), w_alias, cmd.GetDescription())
+
+	}
+
+	w.Flush()
+}
 
 func main() {
 	err := godotenv.Load()
@@ -27,30 +50,38 @@ func main() {
 	// barCmd := flag.NewFlagSet("bar", flag.ExitOnError)
 	// barLevel := barCmd.Int("level", 0, "level")
 
-	meCmd := flag.NewFlagSet("me", flag.ExitOnError)
+	cmds := loadCommands()
 
 	if len(os.Args) < 2 {
-		fmt.Println("expected 'foo' or 'bar' subcommands")
+		printHelp(cmds)
 		os.Exit(1)
 	}
 
-	switch os.Args[1] {
-	// case "foo":
-	// 	fooCmd.Parse(os.Args[2:])
-	// 	fmt.Println("subcommand 'foo'")
-	// 	fmt.Println("  enable:", *fooEnable)
-	// 	fmt.Println("  name:", *fooName)
-	// 	fmt.Println("  tail:", fooCmd.Args())
-	// case "bar":
-	// 	barCmd.Parse(os.Args[2:])
-	// 	fmt.Println("subcommand 'bar'")
-	// 	fmt.Println("  level:", *barLevel)
-	// 	fmt.Println("  tail:", barCmd.Args())
-	case "me":
-		meCmd.Parse(os.Args[2:])
-		retrieveMe()
-	default:
-		fmt.Println("expected 'foo' or 'bar' subcommands")
-		os.Exit(1)
+	for _, command := range cmds {
+		command.Init()
 	}
+
+	for _, command := range cmds {
+		if command.GetCommand() == os.Args[1] {
+			command.Handler(os.Args[:2])
+			return
+		}
+		for _, alias := range command.GetAlias() {
+			if alias == os.Args[1] {
+				command.Handler(os.Args[:2])
+				return
+			}
+		}
+	}
+
+	printHelp(cmds)
+	os.Exit(1)
+}
+
+func loadCommands() []commands.FtCommand {
+	cmds := make([]commands.FtCommand, 0)
+
+	cmds = append(cmds, &commands.FtCommandMe{})
+
+	return cmds
 }

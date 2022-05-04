@@ -1,11 +1,8 @@
-package main
+package intrapi
 
 import (
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
-	"strings"
 	"time"
 
 	"main/ft_auth"
@@ -165,7 +162,7 @@ type User42 struct {
 	Launcher interface{} `json:"launcher"`
 }
 
-func makeReq(req string) []byte {
+func MakeApiRequest(req string) []byte {
 	client := ft_auth.GetHTTPClient()
 
 	response, err := client.Get("https://api.intra.42.fr/v2" + req)
@@ -179,46 +176,4 @@ func makeReq(req string) []byte {
 		log.Fatalf("failed read response: %s\n", err.Error())
 	}
 	return contents
-}
-
-func loadingBar(min, max, current int) string {
-	str := ""
-
-	if current > max {
-		current = max
-	}
-	if current < min {
-		current = min
-	}
-
-	space := max - min
-	if space > 40 {
-
-	} else {
-		load := current - min
-		str = strings.Repeat("=", load)
-		if load > 1 {
-			str = str[:len(str)-1] + ">"
-		}
-		str += strings.Repeat(".", max-current)
-	}
-
-	return str
-}
-
-func retrieveMe() {
-	result := makeReq("/me")
-
-	var user User42
-	json.Unmarshal(result, &user)
-
-	fmt.Println()
-	fmt.Printf(`	██╗  ██╗██████╗ 
-	██║  ██║╚════██╗	%s
-	███████║ █████╔╝	%s
-	╚════██║██╔═══╝ 	Level %.0f
-	     ██║███████╗	lvl 0 [%s] lvl 21
-	     ╚═╝╚══════╝`, user.UsualFullName, user.Login, user.CursusUsers[1].Level, loadingBar(0, 21, int(user.CursusUsers[1].Level)))
-	fmt.Println()
-	fmt.Println()
 }
