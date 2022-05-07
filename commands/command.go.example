@@ -1,0 +1,50 @@
+package commands
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"main/intrapi"
+	"os"
+)
+
+type FtCommandExample struct {
+	flags      *flag.FlagSet
+    arg        bool        
+}
+
+func (me *FtCommandExample) GetCommand() string {
+	return "example"
+}
+
+func (me *FtCommandExample) GetAlias() []string {
+	return []string{"ex", "ej"}
+}
+
+func (me *FtCommandExample) GetFlags() *flag.FlagSet {
+	return me.flags
+}
+
+func (me *FtCommandExample) GetDescription() string {
+	return "Give an example"
+}
+
+func (me *FtCommandExample) Init() {
+	me.arg = false
+
+	me.flags = flag.NewFlagSet(me.GetCommand(), flag.ExitOnError)
+	me.flags.BoolVar(&me.arg, "arg", false, "Get the arg value (false by default)")
+}
+
+func (me *FtCommandExample) DefaultOutput() {
+	fmt.Println("You should create a default output for this!")
+}
+
+func (me *FtCommandExample) Handler(args []string) {
+	if len(args) <= 0 {
+		me.DefaultOutput()
+		return
+	}
+
+    // Doing something here!
+}

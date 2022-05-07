@@ -43,14 +43,7 @@ func main() {
 		log.Fatal("Can't retrieve the OAuth Token... Please, try again.")
 	}
 
-	// fooCmd := flag.NewFlagSet("foo", flag.ExitOnError)
-	// fooEnable := fooCmd.Bool("enable", false, "enable")
-	// fooName := fooCmd.String("name", "", "name")
-
-	// barCmd := flag.NewFlagSet("bar", flag.ExitOnError)
-	// barLevel := barCmd.Int("level", 0, "level")
-
-	cmds := loadCommands()
+	cmds := LoadCommands()
 
 	if len(os.Args) < 2 {
 		printHelp(cmds)
@@ -63,12 +56,14 @@ func main() {
 
 	for _, command := range cmds {
 		if command.GetCommand() == os.Args[1] {
-			command.Handler(os.Args[:2])
+			command.GetFlags().Parse(os.Args[2:])
+			command.Handler(os.Args[2:])
 			return
 		}
 		for _, alias := range command.GetAlias() {
 			if alias == os.Args[1] {
-				command.Handler(os.Args[:2])
+				command.GetFlags().Parse(os.Args[2:])
+				command.Handler(command.GetFlags().Args())
 				return
 			}
 		}
@@ -78,7 +73,7 @@ func main() {
 	os.Exit(1)
 }
 
-func loadCommands() []commands.FtCommand {
+func LoadCommands() []commands.FtCommand {
 	cmds := make([]commands.FtCommand, 0)
 
 	cmds = append(cmds, &commands.FtCommandMe{})

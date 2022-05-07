@@ -1,8 +1,10 @@
-package commands
+package utils
 
-import "strings"
+import (
+	"strings"
+)
 
-func loadingBar(min, max, current int) string {
+func LoadingBar(min, max, current int) string {
 	str := ""
 
 	if current > max {

@@ -1,11 +1,8 @@
 package intrapi
 
 import (
-	"io/ioutil"
-	"log"
+	"encoding/json"
 	"time"
-
-	"main/ft_auth"
 )
 
 type User42 struct {
@@ -82,27 +79,8 @@ type User42 struct {
 		} `json:"cursus"`
 		Launcher interface{} `json:"launcher"`
 	} `json:"cursus_users"`
-	ProjectsUsers []struct {
-		ID            int    `json:"id"`
-		Occurrence    int    `json:"occurrence"`
-		FinalMark     int    `json:"final_mark"`
-		Status        string `json:"status"`
-		Validated     bool   `json:"validated?"`
-		CurrentTeamID int    `json:"current_team_id"`
-		Project       struct {
-			ID       int         `json:"id"`
-			Name     string      `json:"name"`
-			Slug     string      `json:"slug"`
-			ParentID interface{} `json:"parent_id"`
-		} `json:"project"`
-		CursusIds   []int     `json:"cursus_ids"`
-		MarkedAt    time.Time `json:"marked_at"`
-		Marked      bool      `json:"marked"`
-		RetriableAt time.Time `json:"retriable_at"`
-		CreatedAt   time.Time `json:"created_at"`
-		UpdatedAt   time.Time `json:"updated_at"`
-	} `json:"projects_users"`
-	LanguagesUsers []struct {
+	CurrentProjects ProjectsUsers `json:"projects_users"`
+	LanguagesUsers  []struct {
 		ID         int       `json:"id"`
 		LanguageID int       `json:"language_id"`
 		UserID     int       `json:"user_id"`
@@ -162,18 +140,10 @@ type User42 struct {
 	Launcher interface{} `json:"launcher"`
 }
 
-func MakeApiRequest(req string) []byte {
-	client := ft_auth.GetHTTPClient()
+func GetMe() User42 {
+	result := makeAPIReq("/me")
 
-	response, err := client.Get("https://api.intra.42.fr/v2" + req)
-	if err != nil {
-		log.Fatalf("failed getting user info: %s\n", err.Error())
-	}
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatalf("failed read response: %s\n", err.Error())
-	}
-	return contents
+	var user User42
+	json.Unmarshal(result, &user)
+	return user
 }
