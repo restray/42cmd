@@ -56,14 +56,14 @@ func main() {
 
 	for _, command := range cmds {
 		if command.GetCommand() == os.Args[1] {
-			command.GetFlags().Parse(os.Args[2:])
-			command.Handler(os.Args[2:])
+			command.GetFlags().Parse(os.Args[1:])
+			command.Handler(command.GetFlags().Args())
 			return
 		}
 		for _, alias := range command.GetAlias() {
 			if alias == os.Args[1] {
-				command.GetFlags().Parse(os.Args[2:])
-				command.Handler(os.Args[2:])
+				command.GetFlags().Parse(os.Args[1:])
+				command.Handler(command.GetFlags().Args())
 				return
 			}
 		}
@@ -76,7 +76,7 @@ func main() {
 func LoadCommands() []commands.FtCommand {
 	cmds := make([]commands.FtCommand, 0)
 
-	cmds = append(cmds, &commands.FtCommandMe{})
+	// cmds = append(cmds, &commands.FtCommandMe{})
 	cmds = append(cmds, &commands.FtCommandUser{})
 
 	return cmds

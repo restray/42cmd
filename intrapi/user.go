@@ -160,11 +160,11 @@ func (u User42) String() string {
 	return output
 }
 
-func GetMe() User42 {
+func GetMe() *User42 {
 	result := makeAPIReq("/me")
 
-	var user User42
-	json.Unmarshal(result, &user)
+	user := new(User42)
+	json.Unmarshal(result, user)
 	return user
 }
 

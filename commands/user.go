@@ -24,7 +24,7 @@ func (cmd *FtCommandUser) GetCommand() string {
 }
 
 func (cmd *FtCommandUser) GetAlias() []string {
-	return []string{"u"}
+	return []string{"u", "me"}
 }
 
 func (cmd *FtCommandUser) GetFlags() *flag.FlagSet {
@@ -51,9 +51,13 @@ func (cmd *FtCommandUser) DefaultOutput() {
 }
 
 func (cmd *FtCommandUser) Handler(args []string) {
-	if len(args) <= 0 {
+	if len(args) < 1 {
 		cmd.DefaultOutput()
 		return
+	}
+
+	if args[0] != "me" {
+		args = args[1:]
 	}
 
 	cmd.flags.Parse(args[1:])
@@ -68,7 +72,14 @@ func (cmd *FtCommandUser) Handler(args []string) {
 		cmd.Misc = true
 	}
 
-	user := intrapi.GetUserByName(args[0])
+	var user *intrapi.User42
+
+	if args[0] == "me" {
+		user = intrapi.GetMe()
+	} else {
+		user = intrapi.GetUserByName(args[0])
+	}
+
 	if user == nil {
 		fmt.Println("This user doesn't exist...")
 		return
