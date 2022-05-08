@@ -2,6 +2,8 @@ package intrapi
 
 import (
 	"encoding/json"
+	"fmt"
+	"main/commands/utils"
 	"time"
 )
 
@@ -140,10 +142,39 @@ type User42 struct {
 	Launcher interface{} `json:"launcher"`
 }
 
+func (u User42) formatLocation() string {
+	if u.Location != nil {
+		return fmt.Sprint(u.Location)
+	}
+	return "Not at school"
+}
+
+func (u User42) String() string {
+	output := ""
+	output += fmt.Sprintf("\n    ██╗  ██╗██████╗\n")
+	output += fmt.Sprintf("    ██║  ██║╚════██╗	%s <%s>\n", u.UsualFullName, u.Login)
+	output += fmt.Sprintf("    ███████║ █████╔╝	%s\n", u.formatLocation())
+	output += fmt.Sprintf("    ╚════██║██╔═══╝ 	%d Correction points\n", u.CorrectionPoint)
+	output += fmt.Sprintf("         ██║███████╗	lvl %.0f : lvl 0 [%s] lvl 21\n", u.CursusUsers[1].Level, utils.LoadingBar(0, 21, int(u.CursusUsers[1].Level)))
+	output += fmt.Sprintf("         ╚═╝╚══════╝\n")
+	return output
+}
+
 func GetMe() User42 {
 	result := makeAPIReq("/me")
 
 	var user User42
 	json.Unmarshal(result, &user)
 	return user
+}
+
+func GetUserByName(name string) *User42 {
+	result := makeAPIReq("/users/" + name)
+
+	user := new(User42)
+	json.Unmarshal(result, user)
+	if user.ID > 0 {
+		return user
+	}
+	return nil
 }

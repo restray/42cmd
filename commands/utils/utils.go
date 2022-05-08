@@ -28,3 +28,10 @@ func LoadingBar(min, max, current int) string {
 
 	return str
 }
+
+func EmojiBool(b bool) string {
+	if b {
+		return "✅"
+	}
+	return "❌"
+}

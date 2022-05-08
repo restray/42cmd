@@ -63,7 +63,7 @@ func main() {
 		for _, alias := range command.GetAlias() {
 			if alias == os.Args[1] {
 				command.GetFlags().Parse(os.Args[2:])
-				command.Handler(command.GetFlags().Args())
+				command.Handler(os.Args[2:])
 				return
 			}
 		}
