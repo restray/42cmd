@@ -76,12 +76,12 @@ func (me *FtCommandMe) Handler(args []string) {
 
 	for _, command := range cmds {
 		if command.GetCommand() == args[0] {
-			command.Handler(args[:1])
+			command.Handler(args[1:])
 			return
 		}
 		for _, alias := range command.GetAlias() {
 			if alias == args[0] {
-				command.Handler(args[:1])
+				command.Handler(args[1:])
 				return
 			}
 		}

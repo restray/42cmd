@@ -9,6 +9,9 @@ import (
 func makeAPIReq(req string) []byte {
 	client := ft_auth.GetHTTPClient()
 
+	// For Debug purposes:
+	// fmt.Println("https://api.intra.42.fr/v2" + req)
+
 	response, err := client.Get("https://api.intra.42.fr/v2" + req)
 	if err != nil {
 		log.Fatalf("failed getting user info: %s\n", err.Error())

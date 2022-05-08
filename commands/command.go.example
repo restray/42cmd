@@ -1,11 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"main/intrapi"
-	"os"
 )
 
 type FtCommandExample struct {

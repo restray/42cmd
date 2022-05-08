@@ -18,7 +18,7 @@ func printHelp(cmds []commands.FtCommand) {
 		w_alias := ""
 		for _, alias := range cmd.GetAlias() {
 			if len(w_alias) > 0 {
-				w_alias += ", "
+				w_alias += ","
 			}
 			w_alias += alias
 		}
@@ -77,6 +77,7 @@ func LoadCommands() []commands.FtCommand {
 	cmds := make([]commands.FtCommand, 0)
 
 	cmds = append(cmds, &commands.FtCommandMe{})
+	cmds = append(cmds, &commands.FtCommandUser{})
 
 	return cmds
 }

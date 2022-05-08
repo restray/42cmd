@@ -3,80 +3,72 @@ package intrapi
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/olekukonko/tablewriter"
 )
+
+type ProjectStatus int
+
+const (
+	PROJECT_IN_PROGRESS ProjectStatus = iota
+	PROJECT_FINISHED
+)
+
+var projectStatus = map[ProjectStatus]string{
+	PROJECT_IN_PROGRESS: "in_progress",
+	PROJECT_FINISHED:    "finished",
+}
 
 type MeProjects []MeProject
 type MeProject struct {
-	ID          int           `json:"id"`
-	Name        string        `json:"name"`
-	Slug        string        `json:"slug"`
-	Description string        `json:"description"`
-	Parent      interface{}   `json:"parent"`
-	Children    []interface{} `json:"children"`
-	Objectives  []string      `json:"objectives"`
-	Tier        int           `json:"tier"`
-	Attachments []interface{} `json:"attachments"`
-	CreatedAt   time.Time     `json:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
-	Exam        bool          `json:"exam"`
-	Cursus      []struct {
-		ID        int       `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		Name      string    `json:"name"`
-		Slug      string    `json:"slug"`
-	} `json:"cursus"`
-	Campus []struct {
-		ID       int    `json:"id"`
-		Name     string `json:"name"`
-		TimeZone string `json:"time_zone"`
-		Language struct {
-			ID         int       `json:"id"`
-			Name       string    `json:"name"`
-			Identifier string    `json:"identifier"`
-			CreatedAt  time.Time `json:"created_at"`
-			UpdatedAt  time.Time `json:"updated_at"`
-		} `json:"language"`
-		UsersCount  int `json:"users_count"`
-		VogsphereID int `json:"vogsphere_id"`
-	} `json:"campus"`
-	Skills []struct {
-		ID        int       `json:"id"`
-		Name      string    `json:"name"`
-		CreatedAt time.Time `json:"created_at"`
-	} `json:"skills"`
-	Videos []interface{} `json:"videos"`
-	Tags   []struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-		Kind string `json:"kind"`
-	} `json:"tags"`
-	ProjectSessions []struct {
-		ID               int         `json:"id"`
-		Solo             bool        `json:"solo"`
-		BeginAt          interface{} `json:"begin_at"`
-		EndAt            interface{} `json:"end_at"`
-		EstimateTime     int         `json:"estimate_time"`
-		DurationDays     interface{} `json:"duration_days"`
-		TerminatingAfter interface{} `json:"terminating_after"`
-		ProjectID        int         `json:"project_id"`
-		CampusID         interface{} `json:"campus_id"`
-		CursusID         interface{} `json:"cursus_id"`
-		CreatedAt        time.Time   `json:"created_at"`
-		UpdatedAt        time.Time   `json:"updated_at"`
-		MaxPeople        interface{} `json:"max_people"`
-		IsSubscriptable  bool        `json:"is_subscriptable"`
-		Scales           []struct {
-			ID               int  `json:"id"`
-			CorrectionNumber int  `json:"correction_number"`
-			IsPrimary        bool `json:"is_primary"`
-		} `json:"scales"`
-		Uploads []struct {
-			ID   int    `json:"id"`
-			Name string `json:"name"`
-		} `json:"uploads"`
-		TeamBehaviour string `json:"team_behaviour"`
-	} `json:"project_sessions"`
+	ID            int         `json:"id"`
+	Occurrence    int         `json:"occurrence"`
+	FinalMark     interface{} `json:"final_mark"`
+	Status        string      `json:"status"`
+	Validated     interface{} `json:"validated?"`
+	CurrentTeamID int         `json:"current_team_id"`
+	Project       struct {
+		ID       int         `json:"id"`
+		Name     string      `json:"name"`
+		Slug     string      `json:"slug"`
+		ParentID interface{} `json:"parent_id"`
+	} `json:"project"`
+	CursusIds []int `json:"cursus_ids"`
+	User      struct {
+		ID    int    `json:"id"`
+		Login string `json:"login"`
+		URL   string `json:"url"`
+	} `json:"user"`
+	Teams []struct {
+		ID            int         `json:"id"`
+		Name          string      `json:"name"`
+		URL           string      `json:"url"`
+		FinalMark     interface{} `json:"final_mark"`
+		ProjectID     int         `json:"project_id"`
+		CreatedAt     time.Time   `json:"created_at"`
+		UpdatedAt     time.Time   `json:"updated_at"`
+		Status        string      `json:"status"`
+		TerminatingAt interface{} `json:"terminating_at"`
+		Users         []struct {
+			ID             int    `json:"id"`
+			Login          string `json:"login"`
+			URL            string `json:"url"`
+			Leader         bool   `json:"leader"`
+			Occurrence     int    `json:"occurrence"`
+			Validated      bool   `json:"validated"`
+			ProjectsUserID int    `json:"projects_user_id"`
+		} `json:"users"`
+		Locked           bool        `json:"locked?"`
+		Validated        interface{} `json:"validated?"`
+		Closed           bool        `json:"closed?"`
+		RepoURL          interface{} `json:"repo_url"`
+		RepoUUID         string      `json:"repo_uuid"`
+		LockedAt         time.Time   `json:"locked_at"`
+		ClosedAt         interface{} `json:"closed_at"`
+		ProjectSessionID int         `json:"project_session_id"`
+	} `json:"teams"`
 }
 
 func GetProjects() MeProjects {
@@ -87,16 +79,66 @@ func GetProjects() MeProjects {
 	return projects
 }
 
-func (projects MeProjects) String() string {
+func formatProjectStatus(status []ProjectStatus) string {
 	ret := ""
-
-	for _, v := range projects {
-		ret += fmt.Sprintln(v)
+	for _, v := range status {
+		if len(ret) > 0 {
+			ret += ","
+		}
+		ret += projectStatus[v]
 	}
-
 	return ret
 }
 
+type MeProjectsParams struct {
+	Status []ProjectStatus
+	Cursus cursusId
+}
+
+func GetMeProjects(status []ProjectStatus, cursus cursusId) MeProjects {
+	user := GetMe()
+
+	result := makeAPIReq("/users/" + fmt.Sprint(user.ID) + "/projects_users?filter[status]=" + formatProjectStatus(status) + cursus.String() + "&page[size]=100")
+
+	var projects MeProjects
+	json.Unmarshal(result, &projects)
+	return getProjectsForCursus(projects, cursus)
+}
+
+func getProjectsForCursus(projects MeProjects, cursus_searched cursusId) MeProjects {
+	sortedProjects := make(MeProjects, 0)
+	for _, v := range projects {
+		for _, cursus := range v.CursusIds {
+			if cursus == int(cursus_searched)-1 {
+				sortedProjects = append(sortedProjects, v)
+			}
+		}
+	}
+	return sortedProjects
+}
+
+func (projects MeProjects) String() string {
+	tableString := &strings.Builder{}
+
+	table := tablewriter.NewWriter(tableString)
+	table.SetBorder(false)
+	table.SetCenterSeparator("|")
+	table.SetHeader([]string{"Id", "Project", "Status", "Grade"})
+
+	for _, v := range projects {
+		mark := v.FinalMark
+		if mark == nil {
+			mark = "-"
+		}
+
+		table.Append([]string{fmt.Sprint(v.ID), v.Project.Name, v.Status, fmt.Sprint(mark)})
+	}
+
+	table.Render()
+
+	return tableString.String()
+}
+
 func (projectu MeProject) String() string {
-	return fmt.Sprintf("ID: %d | Project: %s", projectu.ID, projectu.Name)
+	return fmt.Sprintf("ID: %d | Project: %s (%s) | Cursus id: %d", projectu.ID, projectu.Project.Name, projectu.Status, projectu.CursusIds[0])
 }

@@ -35,16 +35,8 @@ func (t markedTime) String() string {
 	return t.Format("01/02/2006")
 }
 
-func GetMeProjects() ProjectsUsers {
-	result := makeAPIReq("/me")
-
-	var user User42
-	json.Unmarshal(result, &user)
-	return user.CurrentProjects
-}
-
 func GetProjectsUsers() ProjectsUsers {
-	result := makeAPIReq("/me/projects")
+	result := makeAPIReq("/me/cursus/21/projects")
 
 	var projects ProjectsUsers
 	json.Unmarshal(result, &projects)
