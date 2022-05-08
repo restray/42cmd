@@ -102,8 +102,9 @@ func (cmd *FtCommandUser) Handler(args []string) {
 		fmt.Printf("\t+--------+-%s\n", prefix)
 	}
 	if cmd.Pool {
-		fmt.Println("PoolMonth: " + fmt.Sprint(user.PoolMonth))
-		fmt.Println("PoolYear: " + fmt.Sprint(user.PoolYear))
+		fmt.Printf("\t+------+--------------\n")
+		fmt.Printf("\t| Pool | %s/%s\n", user.PoolMonth, user.PoolYear)
+		fmt.Printf("\t+------+--------------\n")
 	}
 	if cmd.Misc {
 		fmt.Printf("\t   ,==.-------.\n")
