@@ -30,13 +30,13 @@ If you want to use the program everywhere:
 ### For bash users (default)
 
 ```bash
-echo "PATH=$PATH:$HOME/ftcli/" >> ~/.bashrc
+echo "PATH=\$PATH:\$HOME/ftcli/" >> ~/.bashrc
 ```
 
 ### For zsh users
 
 ```zsh
-echo "PATH=$PATH:$HOME/ftcli/" >> ~/.zshrc
+echo "PATH=\$PATH:\$HOME/ftcli/" >> ~/.zshrc
 ```
 
 ```bash

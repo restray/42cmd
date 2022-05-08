@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
+	"path"
+	"path/filepath"
 
 	"golang.org/x/oauth2"
 )
@@ -11,7 +14,12 @@ import (
 func retrieveTokenFromFile() *oauth2.Token {
 	var retrieved_token *oauth2.Token
 
-	if file, err := ioutil.ReadFile("token.json"); err == nil {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+	if file, err := ioutil.ReadFile(path.Join(exPath, "token.json")); err == nil {
 		json.Unmarshal([]byte(file), &retrieved_token)
 	}
 
@@ -27,5 +35,10 @@ func saveTokenOnFile() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ioutil.WriteFile("token.json", resp, 0600)
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+	ioutil.WriteFile(path.Join(exPath, "token.json"), resp, 0600)
 }
