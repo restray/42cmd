@@ -51,25 +51,18 @@ func (cmd *FtCommandUser) DefaultOutput() {
 }
 
 func (cmd *FtCommandUser) Handler(args []string) {
+	if args[0] != "me" {
+		if len(args) > 0 {
+			args = args[1:]
+		} else {
+			cmd.DefaultOutput()
+			return
+		}
+	}
+
 	if len(args) < 1 {
 		cmd.DefaultOutput()
 		return
-	}
-
-	if args[0] != "me" {
-		args = args[1:]
-	}
-
-	cmd.flags.Parse(args[1:])
-
-	cmd.Basic = !cmd.Basic
-
-	if cmd.All {
-		cmd.Basic = true
-		cmd.Detailed = true
-		cmd.ImageURL = true
-		cmd.Pool = true
-		cmd.Misc = true
 	}
 
 	var user *intrapi.User42
@@ -83,6 +76,18 @@ func (cmd *FtCommandUser) Handler(args []string) {
 	if user == nil {
 		fmt.Println("This user doesn't exist...")
 		return
+	}
+
+	cmd.flags.Parse(args[1:])
+
+	cmd.Basic = !cmd.Basic
+
+	if cmd.All {
+		cmd.Basic = true
+		cmd.Detailed = true
+		cmd.ImageURL = true
+		cmd.Pool = true
+		cmd.Misc = true
 	}
 
 	if cmd.Basic {

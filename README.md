@@ -8,7 +8,7 @@ Easily interact with the intra in your terminal!
 ```bash
 mkdir ~/ftcli/
 cd ~/ftcli/
-wget 
+wget https://github.com/restray/42cmd/releases/latest/download/ftcli_linux64 -O ftcli
 ```
 
 At this point, you NEED to have an 42 API application key. Go on this: https://profile.intra.42.fr/oauth/applications.
@@ -23,7 +23,25 @@ Follow this rules:
  - Check **all** the scopes. (Otherwise you'll get errors/permissions denied)
 
 Then, create a file called `.env` in the `~/ftcli/` folder.
-Add [this content](./.env.example) to the file and fill it with your informations.
+Add [this content](./.env.example) to the file and fill it with your informations `uid` and `secret` (on the intra).
+
+If you want to use the program everywhere:
+
+### For bash users (default)
+
+```bash
+echo "PATH=$PATH:$HOME/ftcli/" >> ~/.bashrc
+```
+
+### For zsh users
+
+```zsh
+echo "PATH=$PATH:$HOME/ftcli/" >> ~/.zshrc
+```
+
+```bash
+vim ~/.bashrc
+```
 
 ## ToDo List
 
