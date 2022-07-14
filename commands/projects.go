@@ -1,4 +1,4 @@
-package me_command
+package commands
 
 import (
 	"flag"

@@ -98,11 +98,11 @@ type MeProjectsParams struct {
 func GetMeProjects(status []ProjectStatus, cursus cursusId) MeProjects {
 	user := GetMe()
 
-	result := makeAPIReq("/users/" + fmt.Sprint(user.ID) + "/projects_users?filter[status]=" + formatProjectStatus(status) + cursus.String() + "&page[size]=100")
-
+	result := makeAPIReq(fmt.Sprintf("/users/%d/projects_users?cursus_id=%d", user.ID, cursus))
 	var projects MeProjects
 	json.Unmarshal(result, &projects)
-	return getProjectsForCursus(projects, cursus)
+
+	return projects
 }
 
 func getProjectsForCursus(projects MeProjects, cursus_searched cursusId) MeProjects {

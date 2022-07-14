@@ -11,7 +11,7 @@ const (
 
 func (c cursusId) String() string {
 	if c > 0 {
-		return fmt.Sprintf("&filter[cursus]=%d", c-1)
+		return fmt.Sprintf("&filter[cursus]=%d", c)
 	}
 	return ""
 }
