@@ -6,11 +6,7 @@ import (
 	"main/commands"
 	"main/ft_auth"
 	"os"
-	"path"
-	"path/filepath"
 	"text/tabwriter"
-
-	"github.com/joho/godotenv"
 )
 
 func printHelp(cmds []commands.FtCommand) {
@@ -36,17 +32,9 @@ func printHelp(cmds []commands.FtCommand) {
 }
 
 func main() {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-	err = godotenv.Load(path.Join(exPath, ".env"))
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	cfg := loadConfig()
 
-	if isLogged := ft_auth.Authenticate(os.Getenv("OAUTH_ID"), os.Getenv("OAUTH_SECRET")); !isLogged {
+	if isLogged := ft_auth.Authenticate(cfg.Oauth.Id, cfg.Oauth.Secret); !isLogged {
 		log.Fatal("Can't retrieve the OAuth Token... Please, try again.")
 	}
 
@@ -83,7 +71,8 @@ func main() {
 func LoadCommands() []commands.FtCommand {
 	cmds := make([]commands.FtCommand, 0)
 
-	// cmds = append(cmds, &commands.FtCommandMe{})
+	cmds = append(cmds, &commands.FtCommandLogtime{})
+	cmds = append(cmds, &commands.FtCommandProject{})
 	cmds = append(cmds, &commands.FtCommandUser{})
 
 	return cmds

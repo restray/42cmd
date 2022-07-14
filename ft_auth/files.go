@@ -2,11 +2,11 @@ package ft_auth
 
 import (
 	"encoding/json"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 
 	"golang.org/x/oauth2"
 )
@@ -14,12 +14,13 @@ import (
 func retrieveTokenFromFile() *oauth2.Token {
 	var retrieved_token *oauth2.Token
 
-	ex, err := os.Executable()
+	dirname, err := os.UserHomeDir()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	exPath := filepath.Dir(ex)
-	if file, err := ioutil.ReadFile(path.Join(exPath, "token.json")); err == nil {
+	configFolderPath := path.Join(dirname, ".42cmd")
+
+	if file, err := ioutil.ReadFile(path.Join(configFolderPath, "token.json")); err == nil {
 		json.Unmarshal([]byte(file), &retrieved_token)
 	}
 
@@ -35,10 +36,12 @@ func saveTokenOnFile() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ex, err := os.Executable()
+
+	dirname, err := os.UserHomeDir()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	exPath := filepath.Dir(ex)
-	ioutil.WriteFile(path.Join(exPath, "token.json"), resp, 0600)
+	configFolderPath := path.Join(dirname, ".42cmd")
+
+	ioutil.WriteFile(path.Join(configFolderPath, "token.json"), resp, fs.FileMode(int(0600)))
 }
