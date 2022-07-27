@@ -3,7 +3,9 @@ package commands
 import (
 	"flag"
 	"fmt"
+	"log"
 	"main/intrapi"
+	"strconv"
 )
 
 type FtCommandProject struct {
@@ -41,7 +43,31 @@ func (cmd *FtCommandProject) DefaultOutput() {
 }
 
 func (cmd *FtCommandProject) Handler(args []string) {
-	cmd.flags.Parse(args)
+	cmd.flags.Parse(args[1:])
+
+	if len(cmd.flags.Args()) == 1 {
+		id, err := strconv.Atoi(cmd.flags.Arg(0))
+
+		var project intrapi.Project
+
+		if err != nil {
+			project, err = intrapi.GetProjectFromName(cmd.flags.Arg(0))
+			if err != nil {
+				log.Fatal(err)
+			}
+			id = project.ID
+		}
+
+		project = intrapi.GetProject(id)
+
+		if project.Name == "" {
+			log.Fatal("No project found.")
+		}
+
+		fmt.Printf("%d %s\n", project.ID, project.Name)
+
+		return
+	}
 
 	project_searched := make([]intrapi.ProjectStatus, 0)
 
@@ -57,8 +83,8 @@ func (cmd *FtCommandProject) Handler(args []string) {
 
 	projects := intrapi.GetMeProjects(project_searched, intrapi.CURSUS_42CURSUS)
 
-	fmt.Println("Projects you are looking for:\n")
+	fmt.Printf("Projects you are looking for:\n\n")
 	fmt.Println(projects)
 	fmt.Println("\nUse the following command to get more information about a project")
-	fmt.Println("ftcli me project {id}\n")
+	fmt.Printf("ftcli projects {id}\n\n")
 }

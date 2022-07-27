@@ -3,6 +3,7 @@ package intrapi
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -29,14 +30,9 @@ type MeProject struct {
 	Status        string      `json:"status"`
 	Validated     interface{} `json:"validated?"`
 	CurrentTeamID int         `json:"current_team_id"`
-	Project       struct {
-		ID       int         `json:"id"`
-		Name     string      `json:"name"`
-		Slug     string      `json:"slug"`
-		ParentID interface{} `json:"parent_id"`
-	} `json:"project"`
-	CursusIds []int `json:"cursus_ids"`
-	User      struct {
+	Project       Project     `json:"project"`
+	CursusIds     []int       `json:"cursus_ids"`
+	User          struct {
 		ID    int    `json:"id"`
 		Login string `json:"login"`
 		URL   string `json:"url"`
@@ -98,9 +94,24 @@ type MeProjectsParams struct {
 func GetMeProjects(status []ProjectStatus, cursus cursusId) MeProjects {
 	user := GetMe()
 
-	result := makeAPIReq(fmt.Sprintf("/users/%d/projects_users?cursus_id=%d", user.ID, cursus))
+	query := fmt.Sprintf("cursus_id=%d", cursus-1)
+	if len(status) > 0 {
+		first := true
+		query += "&filter[status]="
+		for _, stat := range status {
+			if !first {
+				query += ","
+			}
+			query += projectStatus[stat]
+			first = false
+		}
+	}
+	result := makeAPIReq(fmt.Sprintf("/users/%d/projects_users?%s", user.ID, query))
+
 	var projects MeProjects
-	json.Unmarshal(result, &projects)
+	if err := json.Unmarshal(result, &projects); err != nil {
+		log.Fatal("Error on parsing JSON", err)
+	}
 
 	return projects
 }
@@ -123,7 +134,7 @@ func (projects MeProjects) String() string {
 	table := tablewriter.NewWriter(tableString)
 	table.SetBorder(false)
 	table.SetCenterSeparator("|")
-	table.SetHeader([]string{"Id", "Project", "Status", "Grade"})
+	table.SetHeader([]string{"Id", "Team Id", "Project", "Status", "Grade"})
 
 	for _, v := range projects {
 		mark := v.FinalMark
@@ -131,7 +142,7 @@ func (projects MeProjects) String() string {
 			mark = "-"
 		}
 
-		table.Append([]string{fmt.Sprint(v.ID), v.Project.Name, v.Status, fmt.Sprint(mark)})
+		table.Append([]string{fmt.Sprint(v.Project.ID), fmt.Sprint(v.ID), v.Project.Name, v.Status, fmt.Sprint(mark)})
 	}
 
 	table.Render()

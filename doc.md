@@ -39,7 +39,6 @@ ftcli me logtime
 ftcli projects [-cursus=current_cursus]
 ftcli projects available # Get available projects
 ftcli projects list # List all the projects for the current cursus
-ftcli projects previous # List all the projects for the current cursus
 ```
 
 #### Project
@@ -47,8 +46,9 @@ ftcli projects previous # List all the projects for the current cursus
 ftcli project {project_name}            # Get detail informations about the project
 ftcli project {project_name} register   # Register to the specified project
 ftcli project {project_name} clone      # Clone the project repo in current folder
-ftcli project {project_name} subject    # Open the subject.pdf in the default browser
 ftcli project {project_name} correct    # Display an interactive list of available correction slots
+# not possible because 42 API doesn't allow it
+# ftcli project {project_name} subject    # Open the subject.pdf in the default browser
 ```
 
 ### User
